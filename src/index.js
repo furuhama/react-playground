@@ -13,6 +13,10 @@ class Square extends React.Component {
 }
 
 class Board extends React.Component {
+  // MEMO: Square がそれぞれ自身の状態を管理するよりも
+  // Board が一括してそれらを管理する構造の方が
+  // 今回の目的としてはいいっぽい
+  // (Board 全体でゲームの状態が変化するため)
   constructor(props) {
     super(props);
     this.state = {
@@ -20,10 +24,15 @@ class Board extends React.Component {
     }
   }
 
-  // TODO: なんで this.state.squares を直接変更せずに
-  // 一度配列をコピーしてからそちらを編集し、
-  // 最後に新しい配列を state.squares として置き換えてるのか調べる
-  // state は immutable なオブジェクトなんかな？
+  // MEMO: state を mutable なオブジェクトと見做して
+  // 直接値を変化させていくと、副作用主体の処理になり
+  // どこで値が変化して現在の状態になっているのかわかりづらくなる
+  // immutable なオブジェクトで置き換える方法ならば、現在の state が
+  // どのオブジェクトなのかを調べることで参照透明的な性質を持つようになる
+  //
+  // また、 immurable なオブジェクトを用いることでレンダリングにおける
+  // 最適化も行いやすくなるみたい
+  // https://reactjs.org/docs/optimizing-performance.html#examples
   handleClick(i) {
     const squares = this.state.squares.slice();
     squares[i] = 'X';
