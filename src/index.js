@@ -36,55 +36,16 @@ class Board extends React.Component {
   // Board が一括してそれらを管理する構造の方が
   // 今回の目的としてはいいっぽい
   // (Board 全体でゲームの状態が変化するため)
-  constructor(props) {
-    super(props);
-    this.state = {
-      squares: Array(9).fill(null),
-      xIsNext: true,
-    }
-  }
-
-  // MEMO: state を mutable なオブジェクトと見做して
-  // 直接値を変化させていくと、副作用主体の処理になり
-  // どこで値が変化して現在の状態になっているのかわかりづらくなる
-  // immutable なオブジェクトで置き換える方法ならば、現在の state が
-  // どのオブジェクトなのかを調べることで参照透明的な性質を持つようになる
   //
-  // また、 immurable なオブジェクトを用いることでレンダリングにおける
-  // 最適化も行いやすくなるみたい
-  // https://reactjs.org/docs/optimizing-performance.html#examples
-  handleClick(i) {
-    const squares = this.state.squares.slice();
-
-    // 既に winner が存在する、もしくはクリックした Square が埋まっている場合は何もしない
-    if (calculateWinner(squares) || squares[i]) {
-      return;
-    }
-
-    squares[i] = this.state.xIsNext ? 'X' : 'O';
-    this.setState({
-      squares: squares,
-      xIsNext: !this.state.xIsNext,
-    });
-  }
-
+  // と、思ったけど、 Board の状態遷移を Game が管理したい仕様になったので
+  // さらに状態を持つのが Game にまで移った
   renderSquare(i) {
-    return <Square value={this.state.squares[i]} onClick={() => this.handleClick(i)} />;
+    return <Square value={this.props.squares[i]} onClick={() => this.props.onClick(i)} />;
   }
 
   render() {
-    const winner = calculateWinner(this.state.squares);
-
-    let status;
-    if (winner) {
-      status = 'Winner: ' + winner;
-    } else {
-      status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
-    }
-
     return (
       <div>
-        <div className="status">{status}</div>
         <div className="board-row">
           {this.renderSquare(0)}
           {this.renderSquare(1)}
@@ -106,14 +67,68 @@ class Board extends React.Component {
 }
 
 class Game extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      history: [{
+        squares: Array(9).fill(null),
+      }],
+      xIsNext: true,
+    };
+  }
+
+  // MEMO: state を mutable なオブジェクトと見做して
+  // 直接値を変化させていくと、副作用主体の処理になり
+  // どこで値が変化して現在の状態になっているのかわかりづらくなる
+  // immutable なオブジェクトで置き換える方法ならば、現在の state が
+  // どのオブジェクトなのかを調べることで参照透明的な性質を持つようになる
+  //
+  // また、 immurable なオブジェクトを用いることでレンダリングにおける
+  // 最適化も行いやすくなるみたい
+  // https://reactjs.org/docs/optimizing-performance.html#examples
+  handleClick(i) {
+    const history = this.state.history;
+    const current = history[history.length - 1];
+    // history や current 全体をコピーすることはせずに
+    // 最低限の配列のみをコピーする
+    const squares = current.squares.slice();
+
+    // 既に winner が存在する、もしくはクリックした Square が埋まっている場合は何もしない
+    if (calculateWinner(squares) || squares[i]) {
+      return;
+    }
+
+    squares[i] = this.state.xIsNext ? 'X' : 'O';
+    this.setState({
+      // state.history に対して破壊的な操作は加えずに、
+      // concat によって新しい {squares: squares} を加えた配列を作成
+      // それを state.history に置き換えている
+      history: history.concat([{
+        squares: squares,
+      }]),
+      xIsNext: !this.state.xIsNext,
+    });
+  }
+
   render() {
+    const history = this.state.history;
+    const current = history[history.length - 1];
+    const winner = calculateWinner(current.squares);
+
+    let status;
+    if (winner) {
+      status = 'Winner: ' + winner;
+    } else {
+      status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
+    }
+
     return (
       <div className="game">
         <div className="game-board">
-          <Board />
+          <Board squares={current.squares} onClick={(i) => this.handleClick(i)} />
         </div>
         <div className="game-info">
-          <div>{/* status */}</div>
+          <div>{status}</div>
           <ol>{/* TODO */}</ol>
         </div>
       </div>
