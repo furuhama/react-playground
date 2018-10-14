@@ -1,3 +1,13 @@
+## React playground
+
+React sample application.
+
+ref: [react tutorial](https://reactjs.org/tutorial/tutorial.html)
+
+And, the following contents are default README descriptions created with `create-react-app` command.
+
+=================================================================================
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 Below you will find some information on how to perform common tasks.<br>
