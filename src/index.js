@@ -18,6 +18,11 @@ import './index.css';
 // function を用いた Function Component に置き換えることで
 // 自身は state を持たず、 props を引数として取る
 // 副作用のない関数型のコンポーネントとすることができる
+//
+// ちなみに
+// onClick={() => this.props.onClick()} は
+// onClick={props.onClick} と書き換えることができる
+// これによって this 句の振る舞いの違いに悩まされなくなるらしい
 function Square(props) {
   return (
     <button className="square" onClick={props.onClick}>
