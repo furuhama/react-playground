@@ -115,6 +115,26 @@ class Game extends React.Component {
     const current = history[history.length - 1];
     const winner = calculateWinner(current.squares);
 
+    const moves = history.map((step, move) => {
+      const desc = move ? 'Go to move #' + move : 'Go to game start';
+
+      return (
+        // MEMO: React は差分だけレンダリングするような仕組みになっている
+        // リストを動的に生成・更新する場合、効率的にコンポーネントの差分を取るためには
+        // 変更前と変更後でどのコンポーネントがどのコンポーネントに対応するのかを明示的に示す必要がある
+        // li タグに置ける key attribute はそのために利用されており
+        // コンポーネントに一意な値を渡す必要がある
+        //
+        // TODO: move は配列を示しているはずだがどうやってシリアライズして key の値に用いているのか謎
+        // key 属性自体は html としてクライアント側まで渡ってきてないっぽい？ので
+        // 単純に Object#=== とかを使って比較してるのかもしれない
+        // (でもそれだと重いし遅くないのかな？？)
+        <li key={move}>
+          <button onClick={() => this.jumpTo(move)}>{desc}</button>
+        </li>
+      )
+    });
+
     let status;
     if (winner) {
       status = 'Winner: ' + winner;
@@ -129,7 +149,7 @@ class Game extends React.Component {
         </div>
         <div className="game-info">
           <div>{status}</div>
-          <ol>{/* TODO */}</ol>
+          <ol>{moves}</ol>
         </div>
       </div>
     );
