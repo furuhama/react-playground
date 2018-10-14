@@ -55,6 +55,12 @@ class Board extends React.Component {
   // https://reactjs.org/docs/optimizing-performance.html#examples
   handleClick(i) {
     const squares = this.state.squares.slice();
+
+    // 既に winner が存在する、もしくはクリックした Square が埋まっている場合は何もしない
+    if (calculateWinner(squares) || squares[i]) {
+      return;
+    }
+
     squares[i] = this.state.xIsNext ? 'X' : 'O';
     this.setState({
       squares: squares,
